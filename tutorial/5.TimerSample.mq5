@@ -1,23 +1,45 @@
-int Count = 0;
+MqlDateTime now;
+int TimerSec = 1;
 
+int timerTriggerCount = 0;
+int TicksReceivedCount = 0;
 
 int OnInit()
-  {
-   EventSetTimer(60);
-   
-   return(INIT_SUCCEEDED);
-  }
+{
+  EventSetTimer(TimerSec);
+
+  return (INIT_SUCCEEDED);
+}
 
 void OnDeinit(const int reason)
-  {
-   EventKillTimer();
-  }
+{
+  EventKillTimer();
+}
 
 void OnTimer()
-  {
-   Count++;
-   string msg = Count + ": " + TimeCurrent() + "\n\r" ;
+{
+  if(TimerSec == 1){
+    //Print( TimerSec );
 
-   Comment(msg);
-   Print(msg);
+    // TimeCurrent(now);
+    TimeTradeServer(now);
+    if (  now.min % 15 == 14 && now.sec == 50)
+    {
+      EventKillTimer();
+      Print("----Kill Timer 1 Sec------------");
+
+      TimerSec = 900;
+      EventSetTimer(TimerSec);
+    }
+    return;
   }
+  
+  timerTriggerCount++;
+  Print( timerTriggerCount);
+}
+
+void OnTick()
+{
+  TicksReceivedCount++;
+  Print( TicksReceivedCount);
+}
