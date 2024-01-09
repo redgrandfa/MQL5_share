@@ -3,7 +3,7 @@
 //| EA初始化函数
 int SAR = 0; 
 
-MqlParam params[]; // 存储指标参数的数组                                       |
+MqlParam params[]; // 存储指标参数的数组
 
 int OnInit()
 {
@@ -18,18 +18,18 @@ int OnInit()
   params[1].type = TYPE_DOUBLE;
   params[1].double_value = 0.2;
 
-  SAR = IndicatorCreate(Symbol(), 0, IND_SAR, 2, params); //(商品,週期,指標(ENUM_INDICATOR),params參數數量,params數組 )
-  //A();
-  
+  SAR = IndicatorCreate(Symbol(), PERIOD_H1, IND_SAR, 2, params); //(商品,週期,指標(ENUM_INDICATOR),params參數數量,params數組 )
+
+  //GetSAR(); //回測：OnInit 想取SAR值必為0
   return (0);
 }
 
 void OnTick()
 {
-  A();
+  GetSAR();
 }
 
-void A(){
+void GetSAR(){
   //--- 獲取指標數據 CopyBuffer()
   double _sar[]; // 儲存數據的數組
 
@@ -49,7 +49,4 @@ void A(){
   //             儲存目的地數組
 
   Print(_sar[0]); // 最近一個K棒的sar值
-
 }
-
-//+------------------------------------------------------------------+
