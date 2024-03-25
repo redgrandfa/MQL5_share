@@ -122,7 +122,7 @@ void OnTick_Game1Setted()
    {
       Print("!!!!!次局方向沒變，首單[假平倉]省點差，需額外調整 Price_LastOpen");
       CloseAllExceptFirstN(1);
-      SetNewGame( newIsLong , FirstOrderUnitAdjust );
+      SetNewGame( newIsLong , 2 + FirstOrderUnitAdjust );
       Price_LastOpen = martinGM.price_Ref;
    }
    else
