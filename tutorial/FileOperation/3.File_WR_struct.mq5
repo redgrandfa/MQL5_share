@@ -5,6 +5,17 @@ struct CanFileWrite
   double b;
 
   int a_arr[3];
+
+  void ShowInfo(){
+    Print(this.a);
+    Print(this.b);
+    Print(this.date);
+
+    int size = ArraySize(this.a_arr) ;
+    for(int i = 0 ; i< size ; i++){
+      Print(this.a_arr[i]);
+    }
+  }
 };
 
 string filename = "structWR.txt";
@@ -51,14 +62,8 @@ void OnDeinit(const int reason)
   while (!FileIsEnding(h))
   {
     FileReadStruct(h, readTo);
-    Print(readTo.a);
-    Print(readTo.b);
-    Print(readTo.date);
 
-    int size = ArraySize(readTo.a_arr) ;
-    for(int i = 0 ; i< size ; i++){
-      Print(readTo.a_arr[i]);
-    }
+    readTo.ShowInfo();
   }
 
   FileClose(h);
