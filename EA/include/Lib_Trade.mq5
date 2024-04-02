@@ -70,7 +70,6 @@ void CloseAllPositions()
 // 從最晚的單開始逐一平倉，保留前N部位
 void CloseAllExceptFirstN(int n)
 {
-   CTrade trade;
    int i = PositionsTotal() - 1;
    while (i >= n)
    {

@@ -1,4 +1,4 @@
-class SarHelper
+class CSarHelper
 {
 public:
   static int sar;
@@ -7,10 +7,10 @@ public:
   static void Preset();
   static double GetSAR();
 };
-int SarHelper::sar = 0;
-ENUM_TIMEFRAMES SarHelper::period_SAR = PERIOD_H1;
-MqlParam SarHelper::params[] = {};
-void SarHelper::Preset()
+int CSarHelper::sar = 0;
+ENUM_TIMEFRAMES CSarHelper::period_SAR = PERIOD_H1;
+MqlParam CSarHelper::params[] = {};
+void CSarHelper::Preset()
 {
   //--- 創建sar指標 IndicatorCreate()
   // 设置params的大小和被调用指标参数数量一致
@@ -26,7 +26,7 @@ void SarHelper::Preset()
   sar = IndicatorCreate(_Symbol, period_SAR, IND_SAR, 2, params);
 }
 // 【sar無法在init取得】
-double SarHelper::GetSAR()
+double CSarHelper::GetSAR()
 {
   //--- 獲取指標數據 CopyBuffer()
   double _sar[]; // 儲存數據的數組
