@@ -20,7 +20,7 @@ public:
 
   double unitToMicroLot;
   int microLot_Holding;
-  
+
 
   CGameMasterBase(bool isLong, int microLot)
   {
@@ -47,9 +47,6 @@ public:
     microLot_Holding = microLot;
   }
 
-
-  // static CGameMasterBase CreateInstance();
-
 	double get_PriceForOpen()
 	{
 		return GetPrice_Current(priceTypeEnum_Open);
@@ -62,10 +59,10 @@ public:
     int microLot_Lack = microLot_Ideal - microLot_Holding;
     if (microLot_Lack > 0)
     {
-      Print("-------加碼:-------");
-      Print("price_LastFetch: ", price_LastFetch);
+      // Print("-------加碼:-------");
+      // Print("price_LastFetch: ", price_LastFetch);
 
-      Print("理想 ", microLot_Ideal, " 微手，大於現在持倉 ", microLot_Holding, "微手");
+      // Print("理想 ", microLot_Ideal, " 微手，大於現在持倉 ", microLot_Holding, "微手");
       Print("---------下單 ", microLot_Lack, " 微手:-----");
 
       OpenPosition_ThenRecord(
@@ -74,9 +71,6 @@ public:
     }
   }
 
-  // void virtual FetchPrice_Then_CalcUnitIdeal(){
-  //   Print(__FUNCSIG__);
-  // }
   void virtual FetchPrice_Then_CalcUnitIdeal() = NULL;
 
   void OpenPosition_ThenRecord(int MicroLot_Order, double Price_Order)
@@ -85,7 +79,7 @@ public:
     double Lot_Order = MicroLot_Order * MICRO;
 
     // 應該僅是檢查是否成功提交訂單
-    if (OpenPosition(orderType, Lot_Order, Price_Order))
+    if (OpenPosition(orderType, Lot_Order*positionMultiplier, Price_Order))
     {
       Price_LastOpen = Price_Order;
       Print("最後進場價Price_LastOpen: ", Price_LastOpen);
@@ -101,5 +95,9 @@ public:
     }
   }
 
-  bool virtual isGameSatisfied() = NULL;
+  bool virtual isGameTakeProfit() = NULL;
+
+  bool virtual isGameStopLoss(){
+    return AccountInfoDouble(ACCOUNT_PROFIT) <= SL_Condition;
+  }
 };

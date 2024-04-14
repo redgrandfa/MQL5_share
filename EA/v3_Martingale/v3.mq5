@@ -1,18 +1,40 @@
+// 指數函數進單，回測比例停利
+
 double Base = 2;
 
-input double Delta = 0.00632;
-input double CloseCondition = 0.41;
+// -500停損：點差10 
+// 2015/03/30~2024/03/30 
+// input double Delta = 0.00950;
+// input double CloseCondition = 0.510;
+// input double FirstOrderAdditionalUnit = 18;
+/*
+Profit          13507.31    => 年化報酬 1.44233632
+EquityDD max    3724.57
+EquityDD abs    3 096.54
+-500停損次數     27
+Total Trades    1231
 
-input double FirstOrderAdditionalUnit = 28;
+Recovery Factor 3.63
+Profit factor   1.89
+Expected Payoff 10.97
+Sharp ratio     0.58
+Complex         80.6
+*/
+
+// -2000停損：點差6  SAR H1
+input uint loopPeriodSec = 900;
+input double priceEndure_To_nDelta = 120; 
+input double CloseCondition = 0.515;
 input double inp_unitToMicroLot = 1;
+input int positionMultiplier = 1;
+input int timeFrameIndex = 11; 
 
 
-
+double FirstOrderAdditionalUnit = 0;
 int firstOrder_microLot = floor(inp_unitToMicroLot * (1 + FirstOrderAdditionalUnit));
-
+double SL_Condition = -2000;
 #include "../include/EventHandler.mq5";
 
-// 網格進單，回測比例停利
 class GM : public CGameMasterBase
 {
 private:
@@ -32,7 +54,7 @@ public:
     price_LastFetch = get_PriceForOpen();
     double priceDiff_Endure = get_priceDiff_Endure();
 
-    nDelta = priceDiff_Endure / Delta;
+    nDelta = priceDiff_Endure * priceEndure_To_nDelta;
     // nDelta   0   1   2   3
     //         +1, +1, +2, +4...
     // sum      1   2   4   8  = 2^n
@@ -49,7 +71,7 @@ public:
   double virtual get_priceDiff_Happy() = NULL;
   double virtual get_priceDiff_LastOpenEndure() = NULL;
 
-  bool isGameSatisfied() override
+  bool isGameTakeProfit() override
   {
     double priceDiff_Happy = get_priceDiff_Happy();
 

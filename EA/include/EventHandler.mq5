@@ -1,8 +1,5 @@
 #define MICRO 0.01
 
-// #include "../include/CSarHelper.mq5"
-// #include "../include/Lib_Trade.mq5"
-// #include "../include/CGameMasterBase.mq5";
 #include "CSarHelper.mq5"
 #include "Lib_Trade.mq5"
 #include "CGameMasterBase.mq5";
@@ -14,9 +11,10 @@ extern datetime MicroLot_Holding_MAX_Time;
 
 
 
-
+datetime dt;
 MqlDateTime now;
 int NewGameCount = 0;
+int StopLossGameCount = 0;
 
 //-------(一)事件函數--------------------------------------------
 int OnInit()
@@ -40,8 +38,12 @@ void OnDeinit(const int reason)
 }
 double OnTester(void)
 {
-  return TesterStatistics(STAT_PROFIT) / TesterStatistics(STAT_EQUITY_DD);
-  // return TesterStatistics(STAT_EQUITY_DD);
+  datetime dt_end = TimeTradeServer(now);
+
+  Print("StopLossGame次數 : ", StopLossGameCount );
+  // return -StopLossGameCount; 
+
+  return TesterStatistics(STAT_PROFIT)/TesterStatistics(STAT_EQUITY_DD)*3600*24*365/uint(dt_end - dt);
 }
 
 void OnTimer() { OnTimerCall(); }
@@ -59,8 +61,8 @@ void OnTimer_Game1Before()
   OnTimerCall = OnTimer_Game1Setted;
   OnTickCall = OnTick_Game1Setted;
 
-  TimeTradeServer(now);
-  int TimerSec = 900 - (now.min * 60 + now.sec + 10) % 900;
+  dt = TimeTradeServer(now);
+  int TimerSec = loopPeriodSec - (now.min * 60 + now.sec + 10) % 900;
 
   EventKillTimer();
 
@@ -79,8 +81,8 @@ void OnTimer_Game1Setted()
   OnTimer_EnsurePositonEnough(); // 先執行一次
 
   EventKillTimer();
-  EventSetTimer(900);
-  Print("設定定時器", 15, "分鐘。第一次觸發有兩倍時間bug");
+  EventSetTimer(loopPeriodSec);
+  Print("設定定時器", loopPeriodSec/60, "分鐘。第一次觸發有兩倍時間bug");
 
   OnTimerCall = OnTimer_EnsurePositonEnough;
 }
@@ -100,11 +102,16 @@ void OnTick_Game1Setted()
   if (gm == NULL)
     return;
 
-  if (!gm.isGameSatisfied())
-    return;
+  if (gm.isGameTakeProfit()){
+    Print("=========停利======");
+    NextGame();
+  }
 
-  Print("===========結束局======");
-  NextGame();
+  if (gm.isGameStopLoss()){
+    Print("=========停損======");
+    StopLossGameCount++;
+    NextGame();
+  }
 }
 
 
@@ -132,7 +139,7 @@ void NextGame(){
 
   if (oldIsLong == newIsLong)
   {
-    Print("!!!!!次局方向沒變，首單[假平倉]省點差，需額外調整 Price_LastOpen");
+    Print("!!!!!次局方向沒變，首單[假平倉]省點差，假調整 Price_LastOpen");
     CloseAllExceptFirstN(1);
 
     InitGame(newIsLong, firstOrder_microLot);
@@ -141,7 +148,7 @@ void NextGame(){
   else
   {
     Print("次局反向，全出場");
-    CloseAllPositions();
+    CloseAllExceptFirstN(0);
     InitGame(newIsLong, 0);
   }
 }

@@ -1,3 +1,27 @@
+ENUM_TIMEFRAMES timeFrames[] = {
+  PERIOD_M1
+  ,PERIOD_M2
+  ,PERIOD_M3
+  ,PERIOD_M4
+  ,PERIOD_M5
+  ,PERIOD_M6
+  ,PERIOD_M10
+  ,PERIOD_M12
+  ,PERIOD_M15
+  ,PERIOD_M20
+  ,PERIOD_M30
+  ,PERIOD_H1  //11
+  ,PERIOD_H2
+  ,PERIOD_H3
+  ,PERIOD_H4  //14
+  ,PERIOD_H6
+  ,PERIOD_H8
+  ,PERIOD_H12
+  ,PERIOD_D1  //18
+  ,PERIOD_W1  
+  ,PERIOD_MN1
+};
+
 class CSarHelper
 {
 public:
@@ -8,7 +32,7 @@ public:
   static double GetSAR();
 };
 int CSarHelper::sar = 0;
-ENUM_TIMEFRAMES CSarHelper::period_SAR = PERIOD_H1;
+ENUM_TIMEFRAMES CSarHelper::period_SAR = timeFrames[timeFrameIndex];
 MqlParam CSarHelper::params[] = {};
 void CSarHelper::Preset()
 {

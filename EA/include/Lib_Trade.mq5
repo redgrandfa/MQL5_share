@@ -50,17 +50,6 @@ bool OpenPosition(ENUM_ORDER_TYPE orderType, double Lot_Order, double Price_Orde
 //   	);            
 // }
 
-void CloseAllPositions()
-{
-   Print("關所有部位");
-
-   int i = PositionsTotal() - 1;
-   while (i >= 0)
-   {
-      if (trade.PositionClose(PositionGetSymbol(i)))
-         i--;
-   }
-}
 
 //      PositionGetInteger(POSITION_TYPE);
 //      POSITION_TYPE_BUY
@@ -70,6 +59,8 @@ void CloseAllPositions()
 // 從最晚的單開始逐一平倉，保留前N部位
 void CloseAllExceptFirstN(int n)
 {
+   Print("關所有部位，保留前"+n+"部位");
+
    int i = PositionsTotal() - 1;
    while (i >= n)
    {
