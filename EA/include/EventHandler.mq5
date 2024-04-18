@@ -1,14 +1,24 @@
 #define MICRO 0.01
+input ushort timer_offset=10;
+
+input uint delay_Seconds = 0;
+input uint delay_Minutes = 0;
+input uint delay_Hours = 0;
+input uint delay_Days = 0;
+input uint delay_Weeks = 0;
+
+uint total_delay_Seconds = delay_Seconds
+  +delay_Minutes*60
+  +delay_Hours*3600
+  +delay_Days*86400
+  +delay_Weeks*86400*7;
+
 
 #include "CSarHelper.mq5"
 #include "Lib_Trade.mq5"
 #include "CGameMasterBase.mq5";
 
 CGameMasterBase *gm = NULL;
-
-extern int MicroLot_Holding_MAX;
-extern datetime MicroLot_Holding_MAX_Time;
-
 
 
 datetime dt;
@@ -24,8 +34,11 @@ int OnInit()
 
   CSarHelper::Preset();
 
-  EventSetTimer(1);
-  return (INIT_SUCCEEDED);
+  Print("total_delay_Seconds : ", total_delay_Seconds );
+  if( EventSetTimer(1 + total_delay_Seconds ) )
+    return (INIT_SUCCEEDED);
+  else
+    return (INIT_PARAMETERS_INCORRECT);
 }
 void OnDeinit(const int reason)
 {
@@ -43,7 +56,8 @@ double OnTester(void)
   Print("StopLossGame次數 : ", StopLossGameCount );
   // return -StopLossGameCount; 
 
-  return TesterStatistics(STAT_PROFIT)/TesterStatistics(STAT_EQUITY_DD)*3600*24*365/uint(dt_end - dt);
+  return TesterStatistics(STAT_PROFIT)/TesterStatistics(STAT_EQUITY_DD)*3600*24*365/
+    ( uint(dt_end - dt) - total_delay_Seconds );
 }
 
 void OnTimer() { OnTimerCall(); }
@@ -62,19 +76,20 @@ void OnTimer_Game1Before()
   OnTickCall = OnTick_Game1Setted;
 
   dt = TimeTradeServer(now);
-  int TimerSec = loopPeriodSec - (now.min * 60 + now.sec + 10) % 900;
+  int TimerSec = loopPeriodSec - (now.min * 60 + now.sec + timer_offset) % loopPeriodSec;
 
+  
   EventKillTimer();
-
-#ifdef _DEBUG
-  Print("_DEBUG");
-  EventSetTimer(TimerSec);
-#else
-  Print("not _DEBUG");
-  EventSetTimer(TimerSec / 2);
-#endif
-
-  Print("設定定時器", TimerSec, "秒，以抓到14:50");
+  Print("設定定時器", TimerSec, "秒，以抓到"+TimerSec/60+"分"+TimerSec%60+"秒。有兩倍時間bug");
+  if(MQLInfoInteger(MQL_TESTER)){
+    EventSetTimer(TimerSec);
+    // V  debug on history
+    // V  profiling on history
+    // v  optimization
+  }else{
+    // X  profiling on real、real
+    EventSetTimer(TimerSec/2);
+  }
 }
 void OnTimer_Game1Setted()
 {
@@ -82,7 +97,7 @@ void OnTimer_Game1Setted()
 
   EventKillTimer();
   EventSetTimer(loopPeriodSec);
-  Print("設定定時器", loopPeriodSec/60, "分鐘。第一次觸發有兩倍時間bug");
+  Print("設定定時器", loopPeriodSec/60, "分鐘。");
 
   OnTimerCall = OnTimer_EnsurePositonEnough;
 }
@@ -107,7 +122,7 @@ void OnTick_Game1Setted()
     NextGame();
   }
 
-  if (gm.isGameStopLoss()){
+  if (enableStopLoss && gm.isGameStopLoss()){
     Print("=========停損======");
     StopLossGameCount++;
     NextGame();
